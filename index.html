@@ -3,28 +3,44 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Expense Tracker + ML</title>
+<title>Expense Tracker</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
-  :root{
-    --bg:#0f0f13;--surface:#18181f;--surface2:#22222c;--border:#2e2e3a;
-    --accent:#7c6af7;--accent2:#5eead4;--accent3:#fb923c;
-    --text:#e8e8f0;--muted:#6b6b80;--danger:#f87171;--success:#4ade80;
-    --font:'Segoe UI',system-ui,sans-serif;
-  }
-  body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh}
-  .app{max-width:960px;margin:0 auto;padding:2rem 1.5rem}
+  :root{--bg:#0f0f13;--surface:#18181f;--surface2:#22222c;--border:#2e2e3a;--accent:#7c6af7;--accent2:#5eead4;--accent3:#fb923c;--text:#e8e8f0;--muted:#6b6b80;--danger:#f87171;--success:#4ade80}
+  body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
 
+  /* AUTH */
+  .auth-page{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:1rem}
+  .auth-box{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:2.5rem 2rem;width:100%;max-width:400px}
+  .auth-logo{text-align:center;margin-bottom:2rem}
+  .auth-logo h1{font-size:1.6rem;font-weight:700}
+  .auth-logo h1 span{color:var(--accent)}
+  .auth-logo p{color:var(--muted);font-size:13px;margin-top:4px}
+  .auth-tabs{display:flex;background:var(--surface2);border-radius:10px;padding:3px;margin-bottom:1.5rem}
+  .auth-tab{flex:1;padding:8px;border:none;background:none;color:var(--muted);font-size:13px;font-weight:500;border-radius:8px;cursor:pointer;transition:all .2s}
+  .auth-tab.active{background:var(--accent);color:#fff}
+  .auth-form{display:none}.auth-form.active{display:block}
+  .field{margin-bottom:12px}
+  .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:500}
+  .field input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:13px;outline:none;font-family:inherit}
+  .field input:focus{border-color:var(--accent)}
+  .auth-btn{width:100%;padding:11px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;margin-top:4px;transition:opacity .2s}
+  .auth-btn:hover{opacity:.85}.auth-btn:disabled{opacity:.45;cursor:not-allowed}
+  .auth-error{background:#3a1a1a;color:var(--danger);border:1px solid #5a2020;border-radius:8px;padding:9px 12px;font-size:12px;margin-top:10px;display:none}
+  .auth-error.show{display:block}
+
+  /* MAIN APP */
+  .main-app{display:none}
+  .app{max-width:960px;margin:0 auto;padding:2rem 1.5rem}
   .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;flex-wrap:wrap;gap:10px}
-  .header h1{font-size:1.5rem;font-weight:700;letter-spacing:-.02em}
-  .header h1 span{color:var(--accent)}
-  .header-right{display:flex;align-items:center;gap:10px}
-  .badge{background:var(--accent);color:#fff;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600}
-  .conn-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);display:inline-block}
-  .conn-dot.ok{background:var(--success)}
-  .conn-dot.err{background:var(--danger)}
-  .conn-label{font-size:12px;color:var(--muted)}
+  .header-left h1{font-size:1.4rem;font-weight:700}
+  .header-left h1 span{color:var(--accent)}
+  .header-left p{font-size:12px;color:var(--muted);margin-top:2px}
+  .user-pill{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:5px 14px 5px 8px;display:flex;align-items:center;gap:8px;font-size:13px}
+  .user-avatar{width:26px;height:26px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff}
+  .logout-btn{background:none;border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:8px;font-size:12px;cursor:pointer;transition:all .2s}
+  .logout-btn:hover{border-color:var(--danger);color:var(--danger)}
 
   .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:1.5rem}
   .stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.1rem}
@@ -35,16 +51,14 @@
   .tabs{display:flex;gap:4px;margin-bottom:1.5rem;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:4px;width:fit-content}
   .tab{padding:7px 18px;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;border:none;background:none;color:var(--muted);transition:all .2s}
   .tab.active{background:var(--accent);color:#fff}
-
   .section{display:none}.section.active{display:block}
 
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1.5rem}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1.2rem}
   @media(max-width:640px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}}
-
   .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.25rem;margin-bottom:1.2rem}
   .card-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:1rem}
 
-  input,select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;outline:none;font-family:var(--font);margin-bottom:8px}
+  input,select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;outline:none;font-family:inherit;margin-bottom:8px}
   input:focus,select:focus{border-color:var(--accent)}
   select option{background:var(--surface2)}
   .form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -65,7 +79,6 @@
   .exp-amt{font-size:13px;font-weight:700;color:var(--danger);white-space:nowrap}
   .exp-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;line-height:1;padding:0 3px}
   .exp-del:hover{color:var(--danger)}
-
   .chart-wrap{position:relative;height:200px;width:100%}
 
   .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:12px}
@@ -74,64 +87,87 @@
   .bar-fill{height:100%;border-radius:4px;transition:width .6s}
   .bar-val{width:65px;color:var(--text);font-weight:600;font-size:12px}
 
-  /* Budget section */
   .budget-item{display:flex;flex-direction:column;gap:6px;padding:10px 0;border-bottom:1px solid var(--border)}
   .budget-item:last-child{border-bottom:none}
-  .budget-top{display:flex;align-items:center;justify-content:space-between}
-  .budget-cat{font-size:13px;font-weight:600}
+  .budget-top{display:flex;align-items:center;gap:8px}
+  .budget-cat{font-size:13px;font-weight:600;flex:1}
   .budget-amt{font-size:12px;color:var(--muted)}
   .budget-track{background:var(--surface2);border-radius:4px;height:7px;overflow:hidden}
   .budget-fill{height:100%;border-radius:4px;transition:width .5s}
-  .budget-fill.ok{background:var(--success)}
-  .budget-fill.warning{background:var(--accent3)}
-  .budget-fill.over{background:var(--danger)}
-  .budget-status{font-size:11px;font-weight:600}
-  .budget-status.ok{color:var(--success)}.budget-status.warning{color:var(--accent3)}.budget-status.over{color:var(--danger)}
+  .budget-fill.ok{background:var(--success)}.budget-fill.warning{background:var(--accent3)}.budget-fill.over{background:var(--danger)}
+  .bstatus{font-size:11px;font-weight:700}
+  .bstatus.ok{color:var(--success)}.bstatus.warning{color:var(--accent3)}.bstatus.over{color:var(--danger)}
 
-  /* ML */
   .ml-btn{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;padding:9px 20px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;transition:opacity .2s}
   .ml-btn:hover{opacity:.85}.ml-btn:disabled{opacity:.45;cursor:not-allowed}
   .ml-output{background:var(--surface2);border-radius:10px;padding:1.1rem;font-size:13px;line-height:1.8;color:var(--text);min-height:70px;border:1px solid var(--border)}
 
   .empty{color:var(--muted);font-size:13px;text-align:center;padding:2rem 0}
   .toast{position:fixed;bottom:20px;right:20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 18px;font-size:13px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none}
-  .toast.show{opacity:1}
-  .toast.success{border-color:var(--success);color:var(--success)}
-  .toast.error{border-color:var(--danger);color:var(--danger)}
-
+  .toast.show{opacity:1}.toast.success{border-color:var(--success);color:var(--success)}.toast.error{border-color:var(--danger);color:var(--danger)}
   @keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
-  .dot{display:inline-block;animation:blink 1.2s infinite}
-  .dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+  .dot{display:inline-block;animation:blink 1.2s infinite}.dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
 </style>
 </head>
 <body>
-<div class="app">
 
+<!-- AUTH PAGE -->
+<div class="auth-page" id="auth-page">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <h1>Expense <span>Tracker</span></h1>
+      <p>Track smart. Spend better.</p>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuth('login')">Login</button>
+      <button class="auth-tab" onclick="switchAuth('register')">Register</button>
+    </div>
+    <div class="auth-form active" id="form-login">
+      <div class="field"><label>Username</label><input type="text" id="l-user" placeholder="Enter username" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+      <div class="field"><label>Password</label><input type="password" id="l-pass" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+      <button class="auth-btn" onclick="doLogin()" id="login-btn">Login</button>
+      <div class="auth-error" id="login-err"></div>
+    </div>
+    <div class="auth-form" id="form-register">
+      <div class="field"><label>Full Name</label><input type="text" id="r-name" placeholder="e.g. Ravi Kumar"/></div>
+      <div class="field"><label>Username</label><input type="text" id="r-user" placeholder="min 3 characters"/></div>
+      <div class="field"><label>Password</label><input type="password" id="r-pass" placeholder="min 4 characters" onkeydown="if(event.key==='Enter')doRegister()"/></div>
+      <button class="auth-btn" onclick="doRegister()" id="register-btn">Create Account</button>
+      <div class="auth-error" id="register-err"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="main-app" id="main-app">
+<div class="app">
   <div class="header">
-    <h1>Expense <span>Tracker</span></h1>
-    <div class="header-right">
-      <span class="conn-dot" id="conn-dot"></span>
-      <span class="conn-label" id="conn-label">Connecting...</span>
-      <span class="badge">Flask + SQLite</span>
+    <div class="header-left">
+      <h1>Expense <span>Tracker</span></h1>
+      <p id="welcome-msg">Welcome!</p>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="user-pill">
+        <div class="user-avatar" id="user-avatar">?</div>
+        <span id="user-name-display">User</span>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">Logout</button>
     </div>
   </div>
 
-  <!-- Stats -->
   <div class="stats">
-    <div class="stat"><div class="stat-label">This Month</div><div class="stat-val orange" id="stat-month">—</div></div>
-    <div class="stat"><div class="stat-label">Total Spent</div><div class="stat-val purple" id="stat-total">—</div></div>
-    <div class="stat"><div class="stat-label">Avg / Day</div><div class="stat-val green" id="stat-avg">—</div></div>
+    <div class="stat"><div class="stat-label">This Month</div><div class="stat-val orange" id="stat-month">₹0</div></div>
+    <div class="stat"><div class="stat-label">Total Spent</div><div class="stat-val purple" id="stat-total">₹0</div></div>
+    <div class="stat"><div class="stat-label">Avg / Day</div><div class="stat-val green" id="stat-avg">₹0</div></div>
   </div>
 
-  <!-- Tabs -->
   <div class="tabs">
-    <button class="tab active" onclick="switchTab('expenses')">Expenses</button>
-    <button class="tab" onclick="switchTab('budgets')">Budgets</button>
-    <button class="tab" onclick="switchTab('analytics')">Analytics</button>
-    <button class="tab" onclick="switchTab('ai')">AI Insights</button>
+    <button class="tab active" onclick="switchTab('expenses',this)">Expenses</button>
+    <button class="tab" onclick="switchTab('budgets',this)">Budgets</button>
+    <button class="tab" onclick="switchTab('analytics',this)">Analytics</button>
+    <button class="tab" onclick="switchTab('ai',this)">AI Insights</button>
   </div>
 
-  <!-- EXPENSES TAB -->
   <div class="section active" id="tab-expenses">
     <div class="grid">
       <div class="card">
@@ -139,339 +175,257 @@
         <input type="text" id="exp-name" placeholder="Description"/>
         <div class="form-row" style="margin-bottom:8px">
           <input type="number" id="exp-amt" placeholder="Amount (₹)" min="1"/>
-          <select id="exp-cat">
-            <option>Food</option><option>Transport</option><option>Shopping</option>
-            <option>Entertainment</option><option>Health</option>
-            <option>Utilities</option><option>Education</option><option>Other</option>
-          </select>
+          <select id="exp-cat"><option>Food</option><option>Transport</option><option>Shopping</option><option>Entertainment</option><option>Health</option><option>Utilities</option><option>Education</option><option>Other</option></select>
         </div>
         <input type="date" id="exp-date"/>
         <button class="btn btn-full" onclick="addExpense()">+ Add Expense</button>
       </div>
-      <div class="card">
-        <div class="card-title">By Category</div>
-        <div class="chart-wrap"><canvas id="donutChart"></canvas></div>
-      </div>
+      <div class="card"><div class="card-title">By Category</div><div class="chart-wrap"><canvas id="donutChart"></canvas></div></div>
     </div>
-    <div class="card">
-      <div class="card-title">Recent Expenses</div>
-      <div class="expense-list" id="exp-list"><div class="empty">Loading...</div></div>
-    </div>
+    <div class="card"><div class="card-title">Recent Expenses</div><div class="expense-list" id="exp-list"><div class="empty">Loading...</div></div></div>
   </div>
 
-  <!-- BUDGETS TAB -->
   <div class="section" id="tab-budgets">
     <div class="grid">
       <div class="card">
         <div class="card-title">Set Monthly Budget</div>
-        <select id="bgt-cat">
-          <option>Food</option><option>Transport</option><option>Shopping</option>
-          <option>Entertainment</option><option>Health</option>
-          <option>Utilities</option><option>Education</option><option>Other</option>
-        </select>
+        <select id="bgt-cat"><option>Food</option><option>Transport</option><option>Shopping</option><option>Entertainment</option><option>Health</option><option>Utilities</option><option>Education</option><option>Other</option></select>
         <input type="number" id="bgt-limit" placeholder="Monthly limit (₹)" min="1"/>
         <button class="btn btn-full" onclick="setBudget()">Set Budget</button>
       </div>
-      <div class="card">
-        <div class="card-title">This Month's Budget Status</div>
-        <div id="budget-list"><div class="empty">No budgets set yet</div></div>
-      </div>
+      <div class="card"><div class="card-title">This Month's Status</div><div id="budget-list"><div class="empty">No budgets set yet</div></div></div>
     </div>
   </div>
 
-  <!-- ANALYTICS TAB -->
   <div class="section" id="tab-analytics">
-    <div class="card">
-      <div class="card-title">6-Month Spending Trend</div>
-      <div id="month-bars"><div class="empty">Loading...</div></div>
-    </div>
-    <div class="card">
-      <div class="card-title">Category-wise Total</div>
-      <div class="chart-wrap"><canvas id="barChart"></canvas></div>
-    </div>
+    <div class="card"><div class="card-title">6-Month Trend</div><div id="month-bars"><div class="empty">Loading...</div></div></div>
+    <div class="card"><div class="card-title">Category-wise Total</div><div class="chart-wrap"><canvas id="barChart"></canvas></div></div>
   </div>
 
-  <!-- AI INSIGHTS TAB -->
   <div class="section" id="tab-ai">
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
         <div class="card-title" style="margin-bottom:0">AI Spending Insights & Prediction</div>
         <button class="ml-btn" id="ml-btn" onclick="runML()">Analyze & Predict</button>
       </div>
-      <div class="ml-output" id="ml-output">
-        Click "Analyze & Predict" to get AI-powered insights about your spending patterns and a next-month forecast.
-      </div>
+      <div class="ml-output" id="ml-output">Click "Analyze & Predict" to get AI-powered insights and next-month forecast.</div>
     </div>
   </div>
-
+</div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-const API = "https://expense-tracker-5bd0.onrender.com/api";
-const CAT_COLORS = {
-  Food:'#f87171',Transport:'#fb923c',Shopping:'#a78bfa',
-  Entertainment:'#60a5fa',Health:'#4ade80',Utilities:'#facc15',
-  Education:'#38bdf8',Other:'#94a3b8'
-};
+const API="http://localhost:5000/api";
+const CC={Food:'#f87171',Transport:'#fb923c',Shopping:'#a78bfa',Entertainment:'#60a5fa',Health:'#4ade80',Utilities:'#facc15',Education:'#38bdf8',Other:'#94a3b8'};
+let dChart=null,bChart=null;
+const fmt=n=>'₹'+Math.round(n).toLocaleString('en-IN');
+const tod=()=>new Date().toISOString().split('T')[0];
 
-let donutInst = null, barInst = null;
-const fmt = n => '₹' + Math.round(n).toLocaleString('en-IN');
-const today = () => new Date().toISOString().split('T')[0];
-document.getElementById('exp-date').value = today();
-
-// ── TOAST ────────────────────────────────
-function toast(msg, type='success'){
-  const el = document.getElementById('toast');
-  el.textContent = msg; el.className = `toast show ${type}`;
-  setTimeout(() => el.className = 'toast', 2500);
+function switchAuth(tab){
+  document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active',(i===0&&tab==='login')||(i===1&&tab==='register')));
+  document.getElementById('form-login').classList.toggle('active',tab==='login');
+  document.getElementById('form-register').classList.toggle('active',tab==='register');
 }
+function showErr(id,msg){const e=document.getElementById(id);e.textContent=msg;e.classList.add('show')}
+function hideErr(id){document.getElementById(id).classList.remove('show')}
 
-// ── TABS ─────────────────────────────────
-function switchTab(name){
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById(`tab-${name}`).classList.add('active');
-  event.target.classList.add('active');
-  if(name === 'analytics') renderAnalytics();
-  if(name === 'budgets')   loadBudgets();
-}
-
-// ── HEALTH CHECK ─────────────────────────
-async function checkHealth(){
+async function doLogin(){
+  hideErr('login-err');
+  const btn=document.getElementById('login-btn');
+  const u=document.getElementById('l-user').value.trim();
+  const p=document.getElementById('l-pass').value.trim();
+  if(!u||!p){showErr('login-err','Enter username and password');return}
+  btn.disabled=true;btn.textContent='Logging in...';
   try{
-    const res = await fetch(`${API}/health`);
-    const data = await res.json();
-    document.getElementById('conn-dot').className = 'conn-dot ok';
-    document.getElementById('conn-label').textContent = 'Connected';
-    loadAll();
-  } catch(e){
-    document.getElementById('conn-dot').className = 'conn-dot err';
-    document.getElementById('conn-label').textContent = 'Server offline';
-    document.getElementById('exp-list').innerHTML = '<div class="empty">⚠️ Cannot connect to Flask server.<br>Run: python app.py</div>';
-  }
+    const res=await fetch(`${API}/auth/login`,{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({username:u,password:p})});
+    const d=await res.json();
+    if(!res.ok){showErr('login-err',d.error);return}
+    enterApp(d.name,d.username);
+  }catch(e){showErr('login-err','Cannot connect to server. Run: python app.py')}
+  finally{btn.disabled=false;btn.textContent='Login'}
 }
 
-async function loadAll(){
-  await Promise.all([loadSummary(), loadExpenses()]);
+async function doRegister(){
+  hideErr('register-err');
+  const btn=document.getElementById('register-btn');
+  const n=document.getElementById('r-name').value.trim();
+  const u=document.getElementById('r-user').value.trim();
+  const p=document.getElementById('r-pass').value.trim();
+  if(!n||!u||!p){showErr('register-err','All fields required');return}
+  btn.disabled=true;btn.textContent='Creating...';
+  try{
+    const res=await fetch(`${API}/auth/register`,{method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',body:JSON.stringify({name:n,username:u,password:p})});
+    const d=await res.json();
+    if(!res.ok){showErr('register-err',d.error);return}
+    enterApp(d.name,d.username);
+  }catch(e){showErr('register-err','Cannot connect to server. Run: python app.py')}
+  finally{btn.disabled=false;btn.textContent='Create Account'}
 }
 
-// ── SUMMARY ──────────────────────────────
+async function doLogout(){
+  await fetch(`${API}/auth/logout`,{method:'POST',credentials:'include'});
+  document.getElementById('main-app').style.display='none';
+  document.getElementById('auth-page').style.display='flex';
+  document.getElementById('l-user').value='';
+  document.getElementById('l-pass').value='';
+}
+
+function enterApp(name){
+  document.getElementById('auth-page').style.display='none';
+  document.getElementById('main-app').style.display='block';
+  document.getElementById('user-name-display').textContent=name;
+  document.getElementById('user-avatar').textContent=name.charAt(0).toUpperCase();
+  document.getElementById('welcome-msg').textContent=`Welcome back, ${name}!`;
+  document.getElementById('exp-date').value=tod();
+  loadAll();
+}
+
+async function checkSession(){
+  try{
+    const res=await fetch(`${API}/auth/me`,{credentials:'include'});
+    const d=await res.json();
+    if(d.logged_in)enterApp(d.name);
+  }catch(e){}
+}
+
+function toast(msg,type='success'){const e=document.getElementById('toast');e.textContent=msg;e.className=`toast show ${type}`;setTimeout(()=>e.className='toast',2500)}
+
+function switchTab(name,btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(`tab-${name}`).classList.add('active');
+  btn.classList.add('active');
+  if(name==='analytics')renderAnalytics();
+  if(name==='budgets')loadBudgets();
+}
+
+async function loadAll(){await Promise.all([loadSummary(),loadExpenses()])}
+
 async function loadSummary(){
   try{
-    const data = await fetch(`${API}/summary`).then(r=>r.json());
-    document.getElementById('stat-month').textContent = fmt(data.this_month);
-    document.getElementById('stat-total').textContent = fmt(data.total);
-    document.getElementById('stat-avg').textContent   = fmt(data.avg_per_day);
-    renderDonut(data.by_category);
-  } catch(e){ console.error(e); }
+    const d=await fetch(`${API}/summary`,{credentials:'include'}).then(r=>r.json());
+    document.getElementById('stat-month').textContent=fmt(d.this_month);
+    document.getElementById('stat-total').textContent=fmt(d.total);
+    document.getElementById('stat-avg').textContent=fmt(d.avg_per_day);
+    renderDonut(d.by_category);
+  }catch(e){}
 }
 
-// ── EXPENSES ─────────────────────────────
 async function loadExpenses(){
-  try{
-    const data = await fetch(`${API}/expenses`).then(r=>r.json());
-    renderExpenseList(data);
-  } catch(e){ console.error(e); }
+  try{const d=await fetch(`${API}/expenses`,{credentials:'include'}).then(r=>r.json());renderList(d)}catch(e){}
 }
 
-function renderExpenseList(expenses){
-  const el = document.getElementById('exp-list');
-  if(!expenses.length){ el.innerHTML='<div class="empty">No expenses yet. Add one!</div>'; return; }
-  el.innerHTML = expenses.slice(0,30).map(e => `
+function renderList(ex){
+  const el=document.getElementById('exp-list');
+  if(!ex.length){el.innerHTML='<div class="empty">No expenses yet!</div>';return}
+  el.innerHTML=ex.slice(0,30).map(e=>`
     <div class="expense-item">
-      <span class="cat-dot" style="background:${CAT_COLORS[e.category]||'#888'}"></span>
-      <div class="exp-info">
-        <div class="exp-name">${e.name}</div>
-        <div class="exp-meta">${e.category} · ${e.date}</div>
-      </div>
+      <span class="cat-dot" style="background:${CC[e.category]||'#888'}"></span>
+      <div class="exp-info"><div class="exp-name">${e.name}</div><div class="exp-meta">${e.category} · ${e.date}</div></div>
       <span class="exp-amt">${fmt(e.amount)}</span>
-      <button class="exp-del" onclick="deleteExpense(${e.id})">×</button>
+      <button class="exp-del" onclick="delExp(${e.id})">×</button>
     </div>`).join('');
 }
 
 async function addExpense(){
-  const name = document.getElementById('exp-name').value.trim();
-  const amt  = parseFloat(document.getElementById('exp-amt').value);
-  const cat  = document.getElementById('exp-cat').value;
-  const date = document.getElementById('exp-date').value;
-  if(!name || !amt || amt<=0){ toast('Enter description and valid amount', 'error'); return; }
-
+  const n=document.getElementById('exp-name').value.trim();
+  const a=parseFloat(document.getElementById('exp-amt').value);
+  const c=document.getElementById('exp-cat').value;
+  const d=document.getElementById('exp-date').value;
+  if(!n||!a||a<=0){toast('Enter description and amount','error');return}
   try{
-    const res = await fetch(`${API}/expenses`, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({name, amount:amt, category:cat, date})
-    });
-    if(!res.ok) throw new Error();
-    document.getElementById('exp-name').value='';
-    document.getElementById('exp-amt').value='';
-    toast('Expense added!');
-    loadAll();
-  } catch(e){ toast('Failed to add expense', 'error'); }
+    await fetch(`${API}/expenses`,{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,amount:a,category:c,date:d})});
+    document.getElementById('exp-name').value='';document.getElementById('exp-amt').value='';
+    toast('Expense added!');loadAll();
+  }catch(e){toast('Failed','error')}
 }
 
-async function deleteExpense(id){
-  try{
-    await fetch(`${API}/expenses/${id}`, {method:'DELETE'});
-    toast('Deleted');
-    loadAll();
-  } catch(e){ toast('Failed to delete','error'); }
+async function delExp(id){
+  try{await fetch(`${API}/expenses/${id}`,{method:'DELETE',credentials:'include'});toast('Deleted');loadAll()}catch(e){}
 }
 
-// ── CHARTS ───────────────────────────────
-function renderDonut(byCat){
-  const labels = byCat.map(c=>c.category);
-  const data   = byCat.map(c=>c.total);
-  const colors = labels.map(l=>CAT_COLORS[l]||'#888');
-  if(donutInst){ donutInst.destroy(); donutInst=null; }
-  if(!labels.length) return;
-  donutInst = new Chart(document.getElementById('donutChart'),{
-    type:'doughnut',
-    data:{labels, datasets:[{data, backgroundColor:colors, borderWidth:2, borderColor:'#18181f'}]},
-    options:{responsive:true, maintainAspectRatio:false, cutout:'65%',
-      plugins:{
-        legend:{display:true, position:'right', labels:{color:'#9090a0',font:{size:11},boxWidth:10,padding:8}},
-        tooltip:{callbacks:{label:c=>' '+c.label+': '+fmt(c.raw)}}
-      }
-    }
-  });
+function renderDonut(bc){
+  const lb=bc.map(c=>c.category),dt=bc.map(c=>c.total),cl=lb.map(l=>CC[l]||'#888');
+  if(dChart){dChart.destroy();dChart=null}
+  if(!lb.length)return;
+  dChart=new Chart(document.getElementById('donutChart'),{type:'doughnut',
+    data:{labels:lb,datasets:[{data:dt,backgroundColor:cl,borderWidth:2,borderColor:'#18181f'}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'65%',
+      plugins:{legend:{display:true,position:'right',labels:{color:'#9090a0',font:{size:11},boxWidth:10,padding:8}},
+      tooltip:{callbacks:{label:c=>' '+c.label+': '+fmt(c.raw)}}}}});
 }
 
 async function renderAnalytics(){
-  try{
-    const data = await fetch(`${API}/summary`).then(r=>r.json());
-    renderBars(data.monthly);
-    renderBarChart(data.by_category);
-  } catch(e){}
+  try{const d=await fetch(`${API}/summary`,{credentials:'include'}).then(r=>r.json());renderBars(d.monthly);renderBC(d.by_category)}catch(e){}
 }
 
 function renderBars(monthly){
-  const el = document.getElementById('month-bars');
-  if(!monthly.length){ el.innerHTML='<div class="empty">No data yet</div>'; return; }
-  const sorted = [...monthly].sort((a,b)=>a.month.localeCompare(b.month));
-  const max  = Math.max(...sorted.map(m=>m.total), 1);
-  const peak = Math.max(...sorted.map(m=>m.total));
-  el.innerHTML = sorted.map(m=>`
-    <div class="bar-row">
-      <div class="bar-label">${m.month.slice(5)}</div>
-      <div class="bar-track">
-        <div class="bar-fill" style="width:${Math.round(m.total/max*100)}%;background:${m.total===peak?'var(--accent3)':'var(--accent)'}"></div>
-      </div>
-      <div class="bar-val">${fmt(Math.round(m.total))}</div>
-    </div>`).join('');
+  const el=document.getElementById('month-bars');
+  if(!monthly.length){el.innerHTML='<div class="empty">No data</div>';return}
+  const s=[...monthly].sort((a,b)=>a.month.localeCompare(b.month));
+  const max=Math.max(...s.map(m=>m.total),1),peak=Math.max(...s.map(m=>m.total));
+  el.innerHTML=s.map(m=>`<div class="bar-row"><div class="bar-label">${m.month.slice(5)}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.round(m.total/max*100)}%;background:${m.total===peak?'var(--accent3)':'var(--accent)'}"></div></div><div class="bar-val">${fmt(Math.round(m.total))}</div></div>`).join('');
 }
 
-function renderBarChart(byCat){
-  if(barInst){ barInst.destroy(); barInst=null; }
-  if(!byCat.length) return;
-  barInst = new Chart(document.getElementById('barChart'),{
-    type:'bar',
-    data:{
-      labels: byCat.map(c=>c.category),
-      datasets:[{
-        label:'Total Spent',
-        data: byCat.map(c=>c.total),
-        backgroundColor: byCat.map(c=>CAT_COLORS[c.category]||'#888'),
-        borderRadius:6, borderWidth:0
-      }]
-    },
-    options:{
-      responsive:true, maintainAspectRatio:false,
-      plugins:{legend:{display:false}, tooltip:{callbacks:{label:c=>' '+fmt(c.raw)}}},
-      scales:{
-        x:{ticks:{color:'#9090a0',font:{size:11}}, grid:{color:'#2e2e3a'}},
-        y:{ticks:{color:'#9090a0',callback:v=>fmt(v), font:{size:11}}, grid:{color:'#2e2e3a'}}
-      }
-    }
-  });
+function renderBC(bc){
+  if(bChart){bChart.destroy();bChart=null}
+  if(!bc.length)return;
+  bChart=new Chart(document.getElementById('barChart'),{type:'bar',
+    data:{labels:bc.map(c=>c.category),datasets:[{data:bc.map(c=>c.total),backgroundColor:bc.map(c=>CC[c.category]||'#888'),borderRadius:6,borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+fmt(c.raw)}}},
+      scales:{x:{ticks:{color:'#9090a0',font:{size:11}},grid:{color:'#2e2e3a'}},y:{ticks:{color:'#9090a0',callback:v=>fmt(v),font:{size:11}},grid:{color:'#2e2e3a'}}}}});
 }
 
-// ── BUDGETS ──────────────────────────────
 async function loadBudgets(){
   try{
-    const data = await fetch(`${API}/budgets`).then(r=>r.json());
-    const el = document.getElementById('budget-list');
-    if(!data.length){ el.innerHTML='<div class="empty">No budgets set</div>'; return; }
-    el.innerHTML = data.map(b=>`
-      <div class="budget-item">
-        <div class="budget-top">
-          <span class="cat-dot" style="background:${CAT_COLORS[b.category]||'#888'}"></span>
-          <span class="budget-cat">${b.category}</span>
-          <span class="budget-status ${b.status}">${b.status==='over'?'OVER BUDGET':b.status==='warning'?'Near limit':'On track'}</span>
-          <button class="btn btn-sm btn-danger" onclick="deleteBudget(${b.id})">Remove</button>
-        </div>
-        <div class="budget-track">
-          <div class="budget-fill ${b.status}" style="width:${Math.min(b.percent_used,100)}%"></div>
-        </div>
-        <div class="budget-amt">${fmt(b.spent)} spent of ${fmt(b.monthly_limit)} · ${b.percent_used}% used · Remaining: ${fmt(Math.max(0,b.remaining))}</div>
-      </div>`).join('');
-  } catch(e){}
+    const d=await fetch(`${API}/budgets`,{credentials:'include'}).then(r=>r.json());
+    const el=document.getElementById('budget-list');
+    if(!d.length){el.innerHTML='<div class="empty">No budgets set</div>';return}
+    el.innerHTML=d.map(b=>`<div class="budget-item">
+      <div class="budget-top"><span class="cat-dot" style="background:${CC[b.category]||'#888'}"></span><span class="budget-cat">${b.category}</span><span class="bstatus ${b.status}">${b.status==='over'?'OVER':b.status==='warning'?'Near limit':'OK'}</span><button class="btn btn-sm btn-danger" onclick="delBudget(${b.id})">Remove</button></div>
+      <div class="budget-track"><div class="budget-fill ${b.status}" style="width:${Math.min(b.percent_used,100)}%"></div></div>
+      <div class="budget-amt">${fmt(b.spent)} / ${fmt(b.monthly_limit)} · ${b.percent_used}% · Remaining: ${fmt(Math.max(0,b.remaining))}</div>
+    </div>`).join('');
+  }catch(e){}
 }
 
 async function setBudget(){
-  const cat   = document.getElementById('bgt-cat').value;
-  const limit = parseFloat(document.getElementById('bgt-limit').value);
-  if(!limit || limit<=0){ toast('Enter a valid limit','error'); return; }
-  try{
-    await fetch(`${API}/budgets`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({category:cat,monthly_limit:limit})});
-    document.getElementById('bgt-limit').value='';
-    toast(`Budget set for ${cat}`);
-    loadBudgets();
-  } catch(e){ toast('Failed to set budget','error'); }
+  const c=document.getElementById('bgt-cat').value,l=parseFloat(document.getElementById('bgt-limit').value);
+  if(!l||l<=0){toast('Enter valid limit','error');return}
+  try{await fetch(`${API}/budgets`,{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify({category:c,monthly_limit:l})});document.getElementById('bgt-limit').value='';toast(`Budget set for ${c}`);loadBudgets()}catch(e){toast('Failed','error')}
 }
 
-async function deleteBudget(id){
-  try{
-    await fetch(`${API}/budgets/${id}`,{method:'DELETE'});
-    toast('Budget removed');
-    loadBudgets();
-  } catch(e){}
+async function delBudget(id){
+  try{await fetch(`${API}/budgets/${id}`,{method:'DELETE',credentials:'include'});toast('Removed');loadBudgets()}catch(e){}
 }
 
-// ── AI ───────────────────────────────────
 async function runML(){
-  const btn = document.getElementById('ml-btn');
-  const out = document.getElementById('ml-output');
-  btn.disabled=true; btn.textContent='Analyzing...';
-  out.innerHTML='Analyzing your spending data<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>';
-
+  const btn=document.getElementById('ml-btn'),out=document.getElementById('ml-output');
+  btn.disabled=true;btn.textContent='Analyzing...';
+  out.innerHTML='Analyzing<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>';
   try{
-    const summary = await fetch(`${API}/summary`).then(r=>r.json());
-    if(summary.transaction_count===0){ out.innerHTML='Add some expenses first!'; btn.disabled=false; btn.textContent='Analyze & Predict'; return; }
-
-    const prompt = `You are a personal finance AI. Analyze this data and provide:
-1. **Spending Patterns**: Key observations
-2. **Top 2 Categories to Reduce**: With specific reduction tips
-3. **Next Month Prediction**: Predicted total (₹) with reasoning
-4. **2 Actionable Tips**: Specific and practical
-
-Data:
-- Total spent: ${fmt(summary.total)} across ${summary.transaction_count} transactions
-- This month: ${fmt(summary.this_month)}
-- Daily average: ${fmt(summary.avg_per_day)}
-- By category: ${summary.by_category.map(c=>c.category+': '+fmt(c.total)).join(', ')}
-- Monthly trend: ${summary.monthly.map(m=>m.month+': '+fmt(m.total)).join(', ')}
-
-Keep under 220 words. Use ₹ symbol. Be friendly and specific.`;
-
-    const res = await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})
-    });
-    const data = await res.json();
-    const text = data.content.map(c=>c.text||'').join('');
-    out.innerHTML = text.replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
-  } catch(e){
-    out.innerHTML='<span style="color:var(--danger)">Error. Make sure Flask server is running and try again.</span>';
-  }
-  btn.disabled=false; btn.textContent='Analyze & Predict';
+    const s=await fetch(`${API}/summary`,{credentials:'include'}).then(r=>r.json());
+    if(s.transaction_count===0){out.innerHTML='Add some expenses first!';return}
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:
+        `Personal finance AI. Analyze and give:
+1. **Spending Patterns**
+2. **Top 2 to Cut** (tips)
+3. **Next Month Prediction** (₹ amount)
+4. **2 Actionable Tips**
+Data: Total:${fmt(s.total)}, Month:${fmt(s.this_month)}, Avg/day:${fmt(s.avg_per_day)}, Count:${s.transaction_count}
+Categories:${s.by_category.map(c=>c.category+':'+fmt(c.total)).join(',')}
+Monthly:${s.monthly.map(m=>m.month+':'+fmt(m.total)).join(',')}
+Under 220 words. Friendly. Use ₹.`}]})});
+    const d=await res.json();
+    out.innerHTML=d.content.map(c=>c.text||'').join('').replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+  }catch(e){out.innerHTML='<span style="color:var(--danger)">Error. Try again.</span>'}
+  btn.disabled=false;btn.textContent='Analyze & Predict';
 }
 
-// ── INIT ─────────────────────────────────
-checkHealth();
+checkSession();
 </script>
 </body>
 </html>
